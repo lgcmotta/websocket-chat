@@ -25,10 +25,10 @@ func (s *Stack) Len() int {
 }
 
 func main() {
-	lambda.Start(handler)
+	lambda.Start(HandleRequest)
 }
 
-func handler(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (apigw.Response, error) {
+func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (apigw.Response, error) {
 	defer func() {
 		_ = logger.Instance.Sync()
 	}()
