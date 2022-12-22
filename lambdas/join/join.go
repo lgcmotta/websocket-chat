@@ -34,7 +34,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	joinInput, err := new(messages.MemberJoinInput).Decode([]byte(req.Body))
 
 	if err != nil {
-		logger.Instance.Error("failed to parse client input",
+		logger.Instance.Error("failed to decode client input",
 			zap.String("requestId", req.RequestContext.RequestID),
 			zap.String("connectionId", req.RequestContext.ConnectionID),
 			zap.Error(err),
@@ -76,7 +76,21 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 
 	message := fmt.Sprintf("%s joined the chat", joinInput.Nickname)
 
-	apigw.Client.BroadcastMessage(ctx, sender, connectedMembers, []byte(message))
+	output := messages.NewMemberJoinOutput(sender.ConnectionId, sender.Nickname, message)
+
+	encodedOutput, err := output.Encode()
+
+	if err != nil {
+		logger.Instance.Error("failed to encode client output",
+			zap.String("requestId", req.RequestContext.RequestID),
+			zap.String("connectionId", req.RequestContext.ConnectionID),
+			zap.Error(err),
+		)
+
+		return apigw.BadRequestResponse(), err
+	}
+
+	apigw.Client.BroadcastMessage(ctx, sender, connectedMembers, encodedOutput)
 
 	return apigw.OkResponse(), nil
 }
