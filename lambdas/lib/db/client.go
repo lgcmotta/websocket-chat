@@ -12,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/lgcmotta/websocket-chat/lib/config"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
-	"github.com/lgcmotta/websocket-chat/lib/members"
 )
 
 type DbClient struct {
@@ -30,7 +29,7 @@ func init() {
 }
 
 func (client *DbClient) AddConnectionID(ctx context.Context, connectionID string) error {
-	connection := members.Member{ConnectionId: connectionID}
+	connection := Member{ConnectionId: connectionID}
 
 	item, err := attributevalue.MarshalMap(connection)
 
@@ -52,12 +51,12 @@ func (client *DbClient) AddConnectionID(ctx context.Context, connectionID string
 	return err
 }
 
-func (client *DbClient) GetMembers(ctx context.Context) ([]members.Member, error) {
+func (client *DbClient) GetMembers(ctx context.Context) ([]Member, error) {
 	input := &dynamodb.ScanInput{
 		TableName: client.dynamoDBTableName,
 	}
 
-	var members []members.Member
+	var members []Member
 
 	result, err := client.dynamoDbClient.Scan(ctx, input)
 
@@ -74,8 +73,8 @@ func (client *DbClient) GetMembers(ctx context.Context) ([]members.Member, error
 	return members, nil
 }
 
-func (client *DbClient) GetMember(ctx context.Context, connectionID string) (*members.Member, error) {
-	member := new(members.Member)
+func (client *DbClient) GetMember(ctx context.Context, connectionID string) (*Member, error) {
+	member := new(Member)
 	member.ConnectionId = connectionID
 
 	input := &dynamodb.GetItemInput{
@@ -101,7 +100,7 @@ func (client *DbClient) GetMember(ctx context.Context, connectionID string) (*me
 }
 
 func (client *DbClient) RemoveConnectionID(ctx context.Context, connectionID string) error {
-	connection := members.Member{ConnectionId: connectionID}
+	connection := Member{ConnectionId: connectionID}
 
 	input := &dynamodb.DeleteItemInput{
 		TableName: client.dynamoDBTableName, Key: connection.GetKey(),
@@ -116,7 +115,7 @@ func (client *DbClient) RemoveConnectionID(ctx context.Context, connectionID str
 }
 
 func (client *DbClient) SetMemberName(ctx context.Context, connectionID, name string) error {
-	member := members.Member{ConnectionId: connectionID, Nickname: name}
+	member := Member{ConnectionId: connectionID, Nickname: name}
 
 	query := expression.Set(expression.Name("nickname"), expression.Value(member.Nickname))
 

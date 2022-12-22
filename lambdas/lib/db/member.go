@@ -1,4 +1,4 @@
-package members
+package db
 
 import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
