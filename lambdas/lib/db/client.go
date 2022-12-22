@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 
@@ -15,14 +16,16 @@ import (
 )
 
 type DbClient struct {
-	dynamoDbClient *dynamodb.Client
+	dynamoDbClient    *dynamodb.Client
+	dynamoDBTableName *string
 }
 
 var Instance *DbClient
 
 func init() {
 	Instance = &DbClient{
-		dynamoDbClient: dynamodb.NewFromConfig(config.Configuration),
+		dynamoDbClient:    dynamodb.NewFromConfig(config.Configuration),
+		dynamoDBTableName: aws.String(os.Getenv("DYNAMODB_TABLE_NAME")),
 	}
 }
 
@@ -36,7 +39,7 @@ func (client *DbClient) AddConnectionID(ctx context.Context, connectionID string
 	}
 
 	input := &dynamodb.PutItemInput{
-		TableName: aws.String("ConnectionIds"),
+		TableName: client.dynamoDBTableName,
 		Item:      item,
 	}
 
@@ -51,7 +54,7 @@ func (client *DbClient) AddConnectionID(ctx context.Context, connectionID string
 
 func (client *DbClient) GetMembers(ctx context.Context) ([]members.Member, error) {
 	input := &dynamodb.ScanInput{
-		TableName: aws.String("ConnectionIds"),
+		TableName: client.dynamoDBTableName,
 	}
 
 	var members []members.Member
@@ -77,7 +80,7 @@ func (client *DbClient) GetMember(ctx context.Context, connectionID string) (*me
 
 	input := &dynamodb.GetItemInput{
 		Key:       member.GetKey(),
-		TableName: aws.String("ConnectionIds"),
+		TableName: client.dynamoDBTableName,
 	}
 
 	response, err := client.dynamoDbClient.GetItem(ctx, input)
@@ -101,7 +104,7 @@ func (client *DbClient) RemoveConnectionID(ctx context.Context, connectionID str
 	connection := members.Member{ConnectionId: connectionID}
 
 	input := &dynamodb.DeleteItemInput{
-		TableName: aws.String("ConnectionIds"), Key: connection.GetKey(),
+		TableName: client.dynamoDBTableName, Key: connection.GetKey(),
 	}
 	_, err := client.dynamoDbClient.DeleteItem(ctx, input)
 
@@ -126,7 +129,7 @@ func (client *DbClient) SetMemberName(ctx context.Context, connectionID, name st
 	}
 
 	input := &dynamodb.UpdateItemInput{
-		TableName:                 aws.String("ConnectionIds"),
+		TableName:                 client.dynamoDBTableName,
 		Key:                       member.GetKey(),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
