@@ -1,31 +1,18 @@
 package connections
 
 import (
-	"errors"
-	"sync"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-type Connections struct {
-	mu            sync.Mutex
-	ConnectionIds []string
+type ConnectionId struct {
+	ConnectionId string `dynamodbav:"connectionId"`
 }
 
-func (stack *Connections) Pop() (string, error) {
-	stack.mu.Lock()
-	defer stack.mu.Unlock()
-
-	count := len(stack.ConnectionIds)
-	if count == 0 {
-		return "", errors.New("no more elements")
+func (connection ConnectionId) GetKey() map[string]types.AttributeValue {
+	connectionId, err := attributevalue.Marshal(connection.ConnectionId)
+	if err != nil {
+		panic(err)
 	}
-
-	connectionId := stack.ConnectionIds[count-1]
-	stack.ConnectionIds = stack.ConnectionIds[:count-1]
-	return connectionId, nil
-}
-
-func (stack *Connections) Len() int {
-	stack.mu.Lock()
-	defer stack.mu.Unlock()
-	return len(stack.ConnectionIds)
+	return map[string]types.AttributeValue{"connectionId": connectionId}
 }

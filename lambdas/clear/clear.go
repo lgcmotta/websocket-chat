@@ -2,27 +2,15 @@ package main
 
 import (
 	"context"
-	"sync"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/lgcmotta/websocket-chat/lib/apigw"
+	"github.com/lgcmotta/websocket-chat/lib/db"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
-	"github.com/lgcmotta/websocket-chat/lib/redis"
-	"github.com/mediocregopher/radix/v4"
+
 	"go.uber.org/zap"
 )
-
-type Stack struct {
-	mu       sync.Mutex
-	elements []string
-}
-
-func (s *Stack) Len() int {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	return len(s.elements)
-}
 
 func main() {
 	lambda.Start(HandleRequest)
@@ -37,22 +25,29 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 		zap.String("requestId", req.RequestContext.RequestID),
 		zap.String("connectionId", req.RequestContext.ConnectionID))
 
-	stack := new(Stack)
-	redis.Client.Do(ctx, radix.Cmd(&(stack.elements), "SMEMBERS", "connections"))
+	connectionIds, err := db.Instance.GetConnectionIDs(ctx)
+
+	if err != nil {
+		logger.Instance.Error("failed to retrieve connection ids",
+			zap.String("requestId", req.RequestContext.RequestID),
+			zap.String("connectionId", req.RequestContext.ConnectionID),
+			zap.Error(err),
+		)
+	}
 
 	logger.Instance.Info("websocket connections read from cache",
-		zap.Int("connections", stack.Len()),
+		zap.Int("connections", len(connectionIds)),
 		zap.String("requestId", req.RequestContext.RequestID),
-		zap.String("connectionId", req.RequestContext.ConnectionID))
+		zap.String("connectionId", req.RequestContext.ConnectionID),
+	)
 
-	var result string
-
-	for _, connectionId := range stack.elements {
-		if connectionId == req.RequestContext.ConnectionID {
+	for _, connectionId := range connectionIds {
+		if connectionId.ConnectionId == req.RequestContext.ConnectionID {
 			continue
 		}
 
-		err := redis.Client.Do(ctx, radix.Cmd(&result, "SREM", "connections", connectionId))
+		err := db.Instance.RemoveConnectionID(ctx, connectionId.ConnectionId)
+
 		if err != nil {
 			logger.Instance.Error("failed to delete connection details from cache",
 				zap.String("requestId", req.RequestContext.RequestID),

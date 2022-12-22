@@ -6,9 +6,8 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/lgcmotta/websocket-chat/lib/apigw"
+	"github.com/lgcmotta/websocket-chat/lib/db"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
-	"github.com/lgcmotta/websocket-chat/lib/redis"
-	"github.com/mediocregopher/radix/v4"
 	"go.uber.org/zap"
 )
 
@@ -26,8 +25,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 		zap.String("connectionId", req.RequestContext.ConnectionID),
 	)
 
-	var result string
-	err := redis.Client.Do(ctx, radix.Cmd(&result, "SADD", "connections", req.RequestContext.ConnectionID))
+	err := db.Instance.AddConnectionID(ctx, req.RequestContext.ConnectionID)
 
 	if err != nil {
 		logger.Instance.Error("failed to cache connection details",
@@ -39,7 +37,6 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	}
 
 	logger.Instance.Info("websocket connection cached",
-		zap.String("result", result),
 		zap.String("requestId", req.RequestContext.RequestID),
 		zap.String("connectionId", req.RequestContext.ConnectionID))
 

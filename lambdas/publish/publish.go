@@ -8,15 +8,13 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/mediocregopher/radix/v4"
 	"go.uber.org/zap"
 
 	"github.com/aws/aws-sdk-go-v2/service/apigatewaymanagementapi"
 	"github.com/lgcmotta/websocket-chat/lib/apigw"
 	"github.com/lgcmotta/websocket-chat/lib/apigw/ws"
-	"github.com/lgcmotta/websocket-chat/lib/connections"
+	"github.com/lgcmotta/websocket-chat/lib/db"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
-	"github.com/lgcmotta/websocket-chat/lib/redis"
 )
 
 var cfg aws.Config
@@ -39,9 +37,6 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	defer func() {
 		_ = logger.Instance.Sync()
 	}()
-
-	childContext, cancel := context.WithTimeout(ctx, 60*time.Second)
-	defer cancel()
 
 	logger.Instance.Info("websocket publish",
 		zap.String("requestId", req.RequestContext.RequestID),
@@ -89,8 +84,8 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 		return apigw.InternalServerErrorResponse(), err
 	}
 
-	connected := new(connections.Connections)
-	err = redis.Client.Do(childContext, radix.Cmd(&(connected.ConnectionIds), "SMEMBERS", "connections"))
+	connectionIds, err := db.Instance.GetConnectionIDs(ctx)
+
 	if err != nil {
 		logger.Instance.Error("failed to read connections from cache",
 			zap.String("requestId", req.RequestContext.RequestID),
@@ -101,16 +96,16 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	}
 
 	logger.Instance.Info("websocket connections read from cache",
-		zap.Int("connections", connected.Len()),
+		zap.Int("connections", len(connectionIds)),
 		zap.String("requestId", req.RequestContext.RequestID),
 		zap.String("connectionId", req.RequestContext.ConnectionID))
 
-	for _, connectionId := range connected.ConnectionIds {
-		err = handleError(childContext, publish(childContext, connectionId, data), connectionId)
+	for _, connectionId := range connectionIds {
+		err = publish(connectionId.ConnectionId, data)
 
 		if err != nil {
 			logger.Instance.Error("failed to publish to connection",
-				zap.String("receiver", connectionId),
+				zap.String("receiver", connectionId.ConnectionId),
 				zap.String("requestId", req.RequestContext.RequestID),
 				zap.String("sender", req.RequestContext.ConnectionID),
 				zap.Error(err))
@@ -120,37 +115,11 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	return apigw.OkResponse(), nil
 }
 
-func publish(ctx context.Context, connectionId string, data []byte) error {
-	_, err := apiClient.PostToConnection(ctx, &apigatewaymanagementapi.PostToConnectionInput{
+func publish(connectionId string, data []byte) error {
+	_, err := apiClient.PostToConnection(context.TODO(), &apigatewaymanagementapi.PostToConnectionInput{
 		Data:         data,
 		ConnectionId: aws.String(connectionId),
 	})
-
-	return err
-}
-
-func handleError(ctx context.Context, err error, connectionId string) error {
-	if err == nil {
-		return err
-	}
-
-	return deleteConnectionId(ctx, connectionId)
-}
-
-func deleteConnectionId(ctx context.Context, id string) error {
-	var result string
-	err := redis.Client.Do(ctx, radix.Cmd(&result, "SREM", "connections", id))
-	if err != nil {
-		logger.Instance.Error("failed to delete connection details from cache",
-			zap.String("connectionId", id),
-			zap.Error(err))
-
-		return err
-	}
-
-	logger.Instance.Info("websocket connection deleted from cache",
-		zap.String("result", result),
-		zap.String("connectionId", id))
 
 	return err
 }
