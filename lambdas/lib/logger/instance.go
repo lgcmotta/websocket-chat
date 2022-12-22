@@ -10,3 +10,7 @@ func init() {
 
 	Instance, _ = config.Build()
 }
+
+func Sync() {
+	_ = Instance.Sync()
+}

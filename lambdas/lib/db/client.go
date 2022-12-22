@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/lgcmotta/websocket-chat/lib/connections"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
+	"github.com/lgcmotta/websocket-chat/lib/members"
 	"go.uber.org/zap"
 )
 
@@ -33,7 +33,7 @@ func init() {
 }
 
 func (client *DbClient) AddConnectionID(ctx context.Context, connectionID string) error {
-	connection := connections.ConnectionId{ConnectionId: connectionID}
+	connection := members.Member{ConnectionId: connectionID}
 
 	item, err := attributevalue.MarshalMap(connection)
 
@@ -59,12 +59,12 @@ func (client *DbClient) AddConnectionID(ctx context.Context, connectionID string
 	return err
 }
 
-func (client *DbClient) GetConnectionIDs(ctx context.Context) ([]connections.ConnectionId, error) {
+func (client *DbClient) GetConnectionIDs(ctx context.Context) ([]members.Member, error) {
 	input := &dynamodb.ScanInput{
 		TableName: aws.String("ConnectionIds"),
 	}
 
-	var connectionIds []connections.ConnectionId
+	var connectionIds []members.Member
 
 	result, err := client.DynamoDbClient.Scan(ctx, input)
 
@@ -86,7 +86,7 @@ func (client *DbClient) GetConnectionIDs(ctx context.Context) ([]connections.Con
 }
 
 func (client *DbClient) RemoveConnectionID(ctx context.Context, connectionID string) error {
-	connection := connections.ConnectionId{ConnectionId: connectionID}
+	connection := members.Member{ConnectionId: connectionID}
 
 	input := &dynamodb.DeleteItemInput{
 		TableName: aws.String("ConnectionIds"), Key: connection.GetKey(),
