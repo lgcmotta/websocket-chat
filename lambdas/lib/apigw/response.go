@@ -9,13 +9,13 @@ import (
 type Response = events.APIGatewayProxyResponse
 
 func InternalServerErrorResponse() Response {
-	return Response{StatusCode: http.StatusInternalServerError}
+	return Response{StatusCode: http.StatusInternalServerError, IsBase64Encoded: false}
 }
 
 func BadRequestResponse() Response {
-	return Response{StatusCode: http.StatusBadRequest}
+	return Response{StatusCode: http.StatusBadRequest, IsBase64Encoded: false}
 }
 
 func OkResponse() Response {
-	return Response{StatusCode: http.StatusOK}
+	return Response{StatusCode: http.StatusOK, IsBase64Encoded: false}
 }
