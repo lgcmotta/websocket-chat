@@ -1,6 +1,8 @@
 package messages
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type MemberJoinInput struct {
 	Nickname string `json:"nickname"`

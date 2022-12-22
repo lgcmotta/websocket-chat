@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -58,9 +57,7 @@ func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (a
 		receivers = append(receivers, connectedMember.Cast())
 	}
 
-	message := fmt.Sprintf(`"%s joined the chat"`, joinInput.Nickname)
-
-	broadcast := messages.NewBroadcastMessageOutput(sender, receivers, []byte(message))
+	broadcast := messages.NewBroadcastMessageOutput(sender, receivers, sender.GetJoiningMessage())
 
 	apigw.Client.BroadcastMessage(ctx, broadcast)
 
