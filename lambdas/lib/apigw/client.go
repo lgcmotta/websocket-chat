@@ -63,9 +63,7 @@ func (client *ApiClient) SendPrivateMessage(ctx context.Context, message *messag
 	if err != nil {
 		logger.Instance.Error("encode message failed",
 			zap.String("receiverId", message.Receiver.ConnectionId),
-			zap.String("receiverName", message.Receiver.Nickname),
 			zap.String("senderId", message.Sender.ConnectionId),
-			zap.String("senderName", message.Sender.Nickname),
 			zap.Error(err),
 		)
 		errs = multierr.Append(errs, err)
@@ -81,9 +79,7 @@ func (client *ApiClient) SendPrivateMessage(ctx context.Context, message *messag
 	if err != nil {
 		logger.Instance.Error("send message failed",
 			zap.String("receiverId", message.Receiver.ConnectionId),
-			zap.String("receiverName", message.Receiver.Nickname),
 			zap.String("senderId", message.Sender.ConnectionId),
-			zap.String("senderName", message.Sender.Nickname),
 			zap.Error(err),
 		)
 		errs = multierr.Append(errs, err)

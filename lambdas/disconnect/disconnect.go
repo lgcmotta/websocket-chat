@@ -70,7 +70,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 		receivers = append(receivers, connectedMember.Cast())
 	}
 
-	message := fmt.Sprintf("%s left the chat", member.Nickname)
+	message := fmt.Sprintf(`"%s left the chat"`, member.Nickname)
 
 	sender := member.Cast()
 

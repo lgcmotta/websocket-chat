@@ -76,7 +76,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 		receivers = append(receivers, connectedMember.Cast())
 	}
 
-	message := fmt.Sprintf("%s joined the chat", joinInput.Nickname)
+	message := fmt.Sprintf(`"%s joined the chat"`, joinInput.Nickname)
 
 	broadcast := messages.NewBroadcastMessageOutput(sender, receivers, []byte(message))
 

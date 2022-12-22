@@ -139,7 +139,7 @@ func (client *DbClient) RemoveConnectionID(ctx context.Context, connectionID str
 func (client *DbClient) SetMemberName(ctx context.Context, connectionID, name string) error {
 	member := members.Member{ConnectionId: connectionID, Nickname: name}
 
-	query := expression.Set(expression.Name("name"), expression.Value(member.Nickname))
+	query := expression.Set(expression.Name("nickname"), expression.Value(member.Nickname))
 
 	expr, err := expression.NewBuilder().WithUpdate(query).Build()
 
