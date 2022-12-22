@@ -7,6 +7,7 @@ import (
 
 type Member struct {
 	ConnectionId string `dynamodbav:"connectionId"`
+	Nickname     string `dynamodbav:"nickname"`
 }
 
 func (member Member) GetKey() map[string]types.AttributeValue {
