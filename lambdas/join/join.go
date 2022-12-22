@@ -11,7 +11,6 @@ import (
 	"github.com/lgcmotta/websocket-chat/lib/db"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
 	"github.com/lgcmotta/websocket-chat/lib/messages"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -19,25 +18,18 @@ func main() {
 }
 
 func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (apigw.Response, error) {
-	defer logger.Sync()
+	defer logger.Log.RequestEnded(req)
+
+	logger.Log.RequestStarted(req)
 
 	if apigw.Client == nil {
 		apigw.Client = apigw.NewAPIGatewayManagementClient(&config.Configuration, req.RequestContext.DomainName, req.RequestContext.Stage)
 	}
 
-	logger.Instance.Info("websocket join",
-		zap.String("requestId", req.RequestContext.RequestID),
-		zap.String("connectionId", req.RequestContext.ConnectionID),
-	)
-
 	joinInput, err := new(messages.MemberJoinInput).Decode([]byte(req.Body))
 
 	if err != nil {
-		logger.Instance.Error("failed to decode client input",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.Error(err),
-		)
+		logger.Log.FailedToDecodeInput(req, err)
 
 		return apigw.BadRequestResponse(), err
 	}
@@ -45,12 +37,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	err = db.Instance.SetMemberName(ctx, req.RequestContext.ConnectionID, joinInput.Nickname)
 
 	if err != nil {
-		logger.Instance.Error("failed to update client nickname",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.String("nickname", joinInput.Nickname),
-			zap.Error(err),
-		)
+		logger.Log.FailedToUpdateMemberNickname(req, joinInput.Nickname, err)
 
 		return apigw.InternalServerErrorResponse(), err
 	}
@@ -58,12 +45,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	connectedMembers, err := db.Instance.GetMembers(ctx)
 
 	if err != nil {
-		logger.Instance.Error("failed to retrive chat members",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.String("nickname", joinInput.Nickname),
-			zap.Error(err),
-		)
+		logger.Log.FailedToRetrieveMembers(req, err)
 
 		return apigw.InternalServerErrorResponse(), err
 	}

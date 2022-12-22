@@ -9,7 +9,6 @@ import (
 	"github.com/lgcmotta/websocket-chat/lib/logger"
 	"github.com/lgcmotta/websocket-chat/lib/messages"
 	"go.uber.org/multierr"
-	"go.uber.org/zap"
 )
 
 type ApiClient struct {
@@ -61,11 +60,12 @@ func (client *ApiClient) SendPrivateMessage(ctx context.Context, message *messag
 	encoded, err := message.Encode()
 
 	if err != nil {
-		logger.Instance.Error("encode message failed",
-			zap.String("receiverId", message.Receiver.ConnectionId),
-			zap.String("senderId", message.Sender.ConnectionId),
-			zap.Error(err),
+		logger.Log.FailedToEncodeOutput(
+			message.Sender.ConnectionId,
+			message.Receiver.ConnectionId,
+			err,
 		)
+
 		errs = multierr.Append(errs, err)
 	}
 
@@ -77,10 +77,9 @@ func (client *ApiClient) SendPrivateMessage(ctx context.Context, message *messag
 	_, err = client.client.PostToConnection(ctx, input)
 
 	if err != nil {
-		logger.Instance.Error("send message failed",
-			zap.String("receiverId", message.Receiver.ConnectionId),
-			zap.String("senderId", message.Sender.ConnectionId),
-			zap.Error(err),
+		logger.Log.FailedToSendMessage(message.Sender.ConnectionId,
+			message.Receiver.ConnectionId,
+			err,
 		)
 		errs = multierr.Append(errs, err)
 	}

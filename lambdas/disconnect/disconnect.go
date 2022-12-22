@@ -11,7 +11,6 @@ import (
 	"github.com/lgcmotta/websocket-chat/lib/db"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
 	"github.com/lgcmotta/websocket-chat/lib/messages"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -19,24 +18,18 @@ func main() {
 }
 
 func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (apigw.Response, error) {
-	defer logger.Sync()
+	defer logger.Log.RequestEnded(req)
+
+	logger.Log.RequestStarted(req)
 
 	if apigw.Client == nil {
 		apigw.Client = apigw.NewAPIGatewayManagementClient(&config.Configuration, req.RequestContext.DomainName, req.RequestContext.Stage)
 	}
 
-	logger.Instance.Info("websocket disconnect",
-		zap.String("requestId", req.RequestContext.RequestID),
-		zap.String("connectionId", req.RequestContext.ConnectionID))
-
 	member, err := db.Instance.GetMember(ctx, req.RequestContext.ConnectionID)
 
 	if err != nil {
-		logger.Instance.Error("failed to retrieve leaving member",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.Error(err),
-		)
+		logger.Log.FailedToRetrieveLeavingMember(req, err)
 
 		return apigw.InternalServerErrorResponse(), err
 	}
@@ -44,11 +37,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	err = db.Instance.RemoveConnectionID(ctx, req.RequestContext.ConnectionID)
 
 	if err != nil {
-		logger.Instance.Error("failed to delete connection details",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.Error(err),
-		)
+		logger.Log.FailedToDeleteConnectionId(req, err)
 
 		return apigw.InternalServerErrorResponse(), err
 	}
@@ -56,10 +45,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	connectedMembers, err := db.Instance.GetMembers(ctx)
 
 	if err != nil {
-		logger.Instance.Error("failed to get connected members",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.Error(err))
+		logger.Log.FailedToRetrieveMembers(req, err)
 
 		return apigw.InternalServerErrorResponse(), err
 	}
@@ -77,10 +63,6 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	broadcast := messages.NewBroadcastMessageOutput(sender, receivers, []byte(message))
 
 	apigw.Client.BroadcastMessage(ctx, broadcast)
-
-	logger.Instance.Info("websocket connection deleted",
-		zap.String("requestId", req.RequestContext.RequestID),
-		zap.String("connectionId", req.RequestContext.ConnectionID))
 
 	return apigw.OkResponse(), nil
 }

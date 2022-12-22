@@ -10,7 +10,6 @@ import (
 	"github.com/lgcmotta/websocket-chat/lib/db"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
 	"github.com/lgcmotta/websocket-chat/lib/messages"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -18,7 +17,9 @@ func main() {
 }
 
 func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (apigw.Response, error) {
-	defer logger.Sync()
+	defer logger.Log.RequestEnded(req)
+
+	logger.Log.RequestStarted(req)
 
 	if apigw.Client == nil {
 		apigw.Client = apigw.NewAPIGatewayManagementClient(&config.Configuration, req.RequestContext.DomainName, req.RequestContext.Stage)
@@ -27,11 +28,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	broadcastInput, err := new(messages.BroadcastMessageInput).Decode([]byte(req.Body))
 
 	if err != nil {
-		logger.Instance.Error("failed to parse client input",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.Error(err),
-		)
+		logger.Log.FailedToDecodeInput(req, err)
 
 		return apigw.BadRequestResponse(), err
 	}
@@ -39,11 +36,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	connectedMembers, err := db.Instance.GetMembers(ctx)
 
 	if err != nil {
-		logger.Instance.Error("failed to retrive chat members",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.Error(err),
-		)
+		logger.Log.FailedToRetrieveMembers(req, err)
 
 		return apigw.InternalServerErrorResponse(), err
 	}
@@ -51,11 +44,7 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 	sender, err := db.Instance.GetMember(ctx, req.RequestContext.ConnectionID)
 
 	if err != nil {
-		logger.Instance.Error("failed to retrieve sender member",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.Error(err),
-		)
+		logger.Log.FailedToRetrieveSender(req, err)
 
 		return apigw.InternalServerErrorResponse(), err
 	}
