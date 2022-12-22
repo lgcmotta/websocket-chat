@@ -2,5 +2,5 @@
 
 build:
 	$(MAKE) -C publish build
-	$(MAKE) -C connect build
-	$(MAKE) -C disconnect build
+	$(MAKE) -C @connect build
+	$(MAKE) -C @disconnect build
