@@ -10,6 +10,7 @@ import (
 	"github.com/lgcmotta/websocket-chat/lib/config"
 	"github.com/lgcmotta/websocket-chat/lib/db"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
+	"github.com/lgcmotta/websocket-chat/lib/messages"
 	"go.uber.org/zap"
 )
 
@@ -63,9 +64,19 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 		return apigw.InternalServerErrorResponse(), err
 	}
 
+	receivers := make([]*messages.Member, 0)
+
+	for _, connectedMember := range connectedMembers {
+		receivers = append(receivers, connectedMember.Cast())
+	}
+
 	message := fmt.Sprintf("%s left the chat", member.Nickname)
 
-	apigw.Client.BroadcastMessage(ctx, *member, connectedMembers, []byte(message))
+	sender := member.Cast()
+
+	broadcast := messages.NewBroadcastMessageOutput(sender, receivers, []byte(message))
+
+	apigw.Client.BroadcastMessage(ctx, broadcast)
 
 	logger.Instance.Info("websocket connection deleted",
 		zap.String("requestId", req.RequestContext.RequestID),

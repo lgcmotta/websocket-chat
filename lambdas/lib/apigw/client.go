@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/apigatewaymanagementapi"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
-	"github.com/lgcmotta/websocket-chat/lib/members"
 	"github.com/lgcmotta/websocket-chat/lib/messages"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
@@ -42,10 +41,13 @@ func NewAPIGatewayManagementClient(cfg *aws.Config, domain, stage string) *ApiCl
 	}
 }
 
-func (client *ApiClient) BroadcastMessage(ctx context.Context, sender members.Member, receivers []members.Member, content []byte) error {
+func (client *ApiClient) BroadcastMessage(ctx context.Context, message *messages.BroadcastMessageOutput) error {
 	var errs error
-	for _, receiver := range receivers {
-		err := client.SendPrivateMessage(ctx, sender, receiver, content)
+	for _, receiver := range message.Receivers {
+		direct := messages.NewDirectMessageOutput(message.Sender, receiver, message.Content)
+
+		err := client.SendPrivateMessage(ctx, direct)
+
 		if err != nil {
 			errs = multierr.Append(errs, err)
 		}
@@ -53,29 +55,24 @@ func (client *ApiClient) BroadcastMessage(ctx context.Context, sender members.Me
 	return errs
 }
 
-func (client *ApiClient) SendPrivateMessage(ctx context.Context, sender members.Member, receiver members.Member, content []byte) error {
+func (client *ApiClient) SendPrivateMessage(ctx context.Context, message *messages.DirectMessageOutput) error {
 	var errs error
-	message := messages.Message{
-		Sender:   sender.Nickname,
-		Receiver: receiver.Nickname,
-		Content:  content,
-	}
 
 	encoded, err := message.Encode()
 
 	if err != nil {
 		logger.Instance.Error("encode message failed",
-			zap.String("receiverId", receiver.ConnectionId),
-			zap.String("receiverName", receiver.Nickname),
-			zap.String("senderId", sender.ConnectionId),
-			zap.String("senderName", sender.Nickname),
+			zap.String("receiverId", message.Receiver.ConnectionId),
+			zap.String("receiverName", message.Receiver.Nickname),
+			zap.String("senderId", message.Sender.ConnectionId),
+			zap.String("senderName", message.Sender.Nickname),
 			zap.Error(err),
 		)
 		errs = multierr.Append(errs, err)
 	}
 
 	input := &apigatewaymanagementapi.PostToConnectionInput{
-		ConnectionId: aws.String(receiver.ConnectionId),
+		ConnectionId: aws.String(message.Receiver.ConnectionId),
 		Data:         encoded,
 	}
 
@@ -83,10 +80,10 @@ func (client *ApiClient) SendPrivateMessage(ctx context.Context, sender members.
 
 	if err != nil {
 		logger.Instance.Error("send message failed",
-			zap.String("receiverId", receiver.ConnectionId),
-			zap.String("receiverName", receiver.Nickname),
-			zap.String("senderId", sender.ConnectionId),
-			zap.String("senderName", sender.Nickname),
+			zap.String("receiverId", message.Receiver.ConnectionId),
+			zap.String("receiverName", message.Receiver.Nickname),
+			zap.String("senderId", message.Sender.ConnectionId),
+			zap.String("senderName", message.Sender.Nickname),
 			zap.Error(err),
 		)
 		errs = multierr.Append(errs, err)

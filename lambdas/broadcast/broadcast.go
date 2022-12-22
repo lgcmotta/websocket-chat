@@ -60,7 +60,15 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 		return apigw.InternalServerErrorResponse(), err
 	}
 
-	apigw.Client.BroadcastMessage(ctx, *sender, connectedMembers, broadcastInput.Content)
+	receivers := make([]*messages.Member, 0)
+
+	for _, connectedMember := range connectedMembers {
+		receivers = append(receivers, connectedMember.Cast())
+	}
+
+	broadcast := messages.NewBroadcastMessageOutput(sender.Cast(), receivers, broadcastInput.Content)
+
+	apigw.Client.BroadcastMessage(ctx, broadcast)
 
 	return apigw.OkResponse(), nil
 }

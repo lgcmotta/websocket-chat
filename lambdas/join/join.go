@@ -10,7 +10,6 @@ import (
 	"github.com/lgcmotta/websocket-chat/lib/config"
 	"github.com/lgcmotta/websocket-chat/lib/db"
 	"github.com/lgcmotta/websocket-chat/lib/logger"
-	"github.com/lgcmotta/websocket-chat/lib/members"
 	"github.com/lgcmotta/websocket-chat/lib/messages"
 	"go.uber.org/zap"
 )
@@ -69,28 +68,19 @@ func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequ
 		return apigw.InternalServerErrorResponse(), err
 	}
 
-	sender := members.Member{
-		ConnectionId: req.RequestContext.ConnectionID,
-		Nickname:     joinInput.Nickname,
+	sender := messages.NewMember(req.RequestContext.ConnectionID, joinInput.Nickname)
+
+	receivers := make([]*messages.Member, 0)
+
+	for _, connectedMember := range connectedMembers {
+		receivers = append(receivers, connectedMember.Cast())
 	}
 
 	message := fmt.Sprintf("%s joined the chat", joinInput.Nickname)
 
-	output := messages.NewMemberJoinOutput(sender.ConnectionId, sender.Nickname, message)
+	broadcast := messages.NewBroadcastMessageOutput(sender, receivers, []byte(message))
 
-	encodedOutput, err := output.Encode()
-
-	if err != nil {
-		logger.Instance.Error("failed to encode client output",
-			zap.String("requestId", req.RequestContext.RequestID),
-			zap.String("connectionId", req.RequestContext.ConnectionID),
-			zap.Error(err),
-		)
-
-		return apigw.BadRequestResponse(), err
-	}
-
-	apigw.Client.BroadcastMessage(ctx, sender, connectedMembers, encodedOutput)
+	apigw.Client.BroadcastMessage(ctx, broadcast)
 
 	return apigw.OkResponse(), nil
 }
