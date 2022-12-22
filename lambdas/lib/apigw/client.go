@@ -14,17 +14,17 @@ func NewAPIGatewayManagementClient(cfg *aws.Config, domain, stage string) *apiga
 	customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 		logger.Instance.Info("inputs from endpoint resolver", zap.String("service", service), zap.String("region", region))
 
-		if service != "execute-api" {
-			return cfg.EndpointResolverWithOptions.ResolveEndpoint(service, region, options...)
-		}
-
 		var endpoint url.URL
 		endpoint.Path = stage
 		endpoint.Host = domain
 		endpoint.Scheme = "https"
+
+		logger.Instance.Info("using endpoint for aws gateway as", zap.String("endpoint", endpoint.String()))
+
 		return aws.Endpoint{
 			SigningRegion: region,
 			URL:           endpoint.String(),
+			PartitionID:   "aws",
 		}, nil
 	})
 
