@@ -7,7 +7,6 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.17.3
 	github.com/aws/aws-sdk-go-v2/config v1.18.7
 	github.com/aws/aws-sdk-go-v2/service/apigatewaymanagementapi v1.10.21
-	github.com/mediocregopher/radix/v4 v4.1.1
 	go.uber.org/zap v1.24.0
 )
 
@@ -30,7 +29,6 @@ require (
 	github.com/aws/smithy-go v1.13.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/tilinna/clock v1.1.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 )
