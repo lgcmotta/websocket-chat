@@ -14,10 +14,10 @@ import (
 )
 
 func main() {
-	lambda.Start(HandleRequest)
+	lambda.Start(handle)
 }
 
-func HandleRequest(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (apigw.Response, error) {
+func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (apigw.Response, error) {
 	defer logger.Log.RequestEnded(req)
 
 	logger.Log.RequestStarted(req)
