@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -55,7 +56,9 @@ func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (a
 		receivers = append(receivers, connectedMember.Cast())
 	}
 
-	broadcast := messages.NewBroadcastMessageOutput(sender.Cast(), receivers, broadcastInput.Content)
+	receivedAt := time.Now()
+
+	broadcast := messages.NewBroadcastMessageOutput(sender.Cast(), receivers, broadcastInput.Content, &receivedAt)
 
 	apigw.Client.BroadcastMessage(ctx, broadcast)
 

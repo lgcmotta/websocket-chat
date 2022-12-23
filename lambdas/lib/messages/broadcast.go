@@ -1,6 +1,9 @@
 package messages
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 type BroadcastMessageInput struct {
 	Content json.RawMessage `json:"content"`
@@ -12,19 +15,21 @@ func (input *BroadcastMessageInput) Decode(message []byte) (*BroadcastMessageInp
 }
 
 type BroadcastMessageOutput struct {
-	Sender    *Member         `json:"sender"`
-	Receivers []*Member       `json:"receivers"`
-	Content   json.RawMessage `json:"content"`
+	Sender     *Member         `json:"sender"`
+	Receivers  []*Member       `json:"receivers"`
+	Content    json.RawMessage `json:"content"`
+	ReceivedAt *time.Time      `json:"receivedAt"`
 }
 
 func (output *BroadcastMessageOutput) Encode() ([]byte, error) {
 	return json.Marshal(output)
 }
 
-func NewBroadcastMessageOutput(sender *Member, receivers []*Member, content json.RawMessage) *BroadcastMessageOutput {
+func NewBroadcastMessageOutput(sender *Member, receivers []*Member, content json.RawMessage, receivedAt *time.Time) *BroadcastMessageOutput {
 	return &BroadcastMessageOutput{
-		Sender:    sender,
-		Receivers: receivers,
-		Content:   content,
+		Sender:     sender,
+		Receivers:  receivers,
+		Content:    content,
+		ReceivedAt: receivedAt,
 	}
 }

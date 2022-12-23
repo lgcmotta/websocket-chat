@@ -43,9 +43,9 @@ func NewAPIGatewayManagementClient(cfg *aws.Config, domain, stage string) *ApiCl
 func (client *ApiClient) BroadcastMessage(ctx context.Context, message *messages.BroadcastMessageOutput) error {
 	var errs error
 	for _, receiver := range message.Receivers {
-		direct := messages.NewDirectMessageOutput(message.Sender, receiver, message.Content)
+		direct := messages.NewMessageOutput(message.Sender, receiver, message.Content, message.ReceivedAt, messages.Broadcast)
 
-		err := client.SendPrivateMessage(ctx, direct)
+		err := client.SendMessage(ctx, direct)
 
 		if err != nil {
 			errs = multierr.Append(errs, err)
@@ -54,7 +54,7 @@ func (client *ApiClient) BroadcastMessage(ctx context.Context, message *messages
 	return errs
 }
 
-func (client *ApiClient) SendPrivateMessage(ctx context.Context, message *messages.DirectMessageOutput) error {
+func (client *ApiClient) SendMessage(ctx context.Context, message *messages.MessageOutput) error {
 	var errs error
 
 	encoded, err := message.Encode()

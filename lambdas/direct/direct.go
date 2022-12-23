@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -49,13 +50,17 @@ func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (a
 		return apigw.InternalServerErrorResponse(), err
 	}
 
-	direct := messages.NewDirectMessageOutput(
+	receivedAt := time.Now()
+
+	direct := messages.NewMessageOutput(
 		sender.Cast(),
 		receiver.Cast(),
 		directInput.Content,
+		&receivedAt,
+		messages.Direct,
 	)
 
-	apigw.Client.SendPrivateMessage(ctx, direct)
+	apigw.Client.SendMessage(ctx, direct)
 
 	return apigw.OkResponse(), nil
 }
