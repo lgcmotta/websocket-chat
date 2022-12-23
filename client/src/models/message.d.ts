@@ -1,17 +1,15 @@
 import { IMember } from "./member";
 
-
-export enum MessageType {
-  BROADCAST = "broadcast",
-  DIRECFT = "direct"
-}
-
 export interface IMessageReceived {
   sender: IMember;
   receiver: IMember;
   content: string;
-  receivedAt: Date;
-  type: MessageType;
+  receivedAt: string;
+  type: "broadcast" | "direct";
+}
+
+export interface IMessageReceivedProps {
+  message: IMessageReceived;
 }
 
 export interface IMessage {

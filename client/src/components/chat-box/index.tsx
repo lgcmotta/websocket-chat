@@ -1,10 +1,9 @@
-import BroadcastIncomingMessage from "../broadcast-incoming-message"
-import DirectIncomingMessage from "../direct-incoming-message"
 import MessageInput from "../message-input"
-import BroadcastOutgoingMessage from "../broadcast-outgoing-message"
-import DirectOutgoingMessage from "../direct-outgoing-message"
+import IncomingMessage from "../incoming-message"
+import { useSelector } from "../../context/chat-context"
 
 const ChatBox = () => {
+  const messages = useSelector(state => state.messages)
   return (
     <div className="w-full
                     h-full
@@ -29,22 +28,8 @@ const ChatBox = () => {
                       bg-[#18181b]
                       overflow-x-hidden
                       overflow-y-auto">
-        <BroadcastIncomingMessage />
-        <BroadcastOutgoingMessage />
-        <DirectIncomingMessage />
-        <BroadcastOutgoingMessage />
-        <BroadcastIncomingMessage />
-        <DirectOutgoingMessage />
-        <BroadcastIncomingMessage />
-        <BroadcastOutgoingMessage />
-        <BroadcastIncomingMessage />
-        <BroadcastOutgoingMessage />
-        <BroadcastIncomingMessage />
-        <BroadcastOutgoingMessage />
-        <BroadcastIncomingMessage />
-        <BroadcastOutgoingMessage />
-        <BroadcastIncomingMessage />
-        <BroadcastOutgoingMessage />
+        {/* TODO: map app messages */}
+        {messages.map((message, index) => <IncomingMessage key={index} message={message} />)}
       </div>
       <MessageInput />
     </div>
