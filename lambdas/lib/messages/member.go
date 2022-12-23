@@ -14,12 +14,10 @@ func NewMember(connectionId, nickname string) *Member {
 	}
 }
 
-func (member *Member) GetJoiningMessage() []byte {
-	message := fmt.Sprintf(`"%s just joined the chat"`, member.Nickname)
-	return []byte(message)
+func (member *Member) GetJoiningMessage() string {
+	return fmt.Sprintf(`"%s just joined the chat"`, member.Nickname)
 }
 
-func (member *Member) GetLeavingMessage() []byte {
-	message := fmt.Sprintf(`"%s has left the chat"`, member.Nickname)
-	return []byte(message)
+func (member *Member) GetLeavingMessage() string {
+	return fmt.Sprintf(`"%s has left the chat"`, member.Nickname)
 }

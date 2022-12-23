@@ -6,7 +6,7 @@ import (
 )
 
 type BroadcastMessageInput struct {
-	Content json.RawMessage `json:"content"`
+	Content string `json:"content"`
 }
 
 func (input *BroadcastMessageInput) Decode(message []byte) (*BroadcastMessageInput, error) {
@@ -15,17 +15,17 @@ func (input *BroadcastMessageInput) Decode(message []byte) (*BroadcastMessageInp
 }
 
 type BroadcastMessageOutput struct {
-	Sender     *Member         `json:"sender"`
-	Receivers  []*Member       `json:"receivers"`
-	Content    json.RawMessage `json:"content"`
-	ReceivedAt *time.Time      `json:"receivedAt"`
+	Sender     *Member    `json:"sender"`
+	Receivers  []*Member  `json:"receivers"`
+	Content    string     `json:"content"`
+	ReceivedAt *time.Time `json:"receivedAt"`
 }
 
 func (output *BroadcastMessageOutput) Encode() ([]byte, error) {
 	return json.Marshal(output)
 }
 
-func NewBroadcastMessageOutput(sender *Member, receivers []*Member, content json.RawMessage, receivedAt *time.Time) *BroadcastMessageOutput {
+func NewBroadcastMessageOutput(sender *Member, receivers []*Member, content string, receivedAt *time.Time) *BroadcastMessageOutput {
 	return &BroadcastMessageOutput{
 		Sender:     sender,
 		Receivers:  receivers,

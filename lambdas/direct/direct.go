@@ -57,7 +57,7 @@ func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (a
 		receiver.Cast(),
 		directInput.Content,
 		&receivedAt,
-		messages.Direct,
+		"direct",
 	)
 
 	apigw.Client.SendMessage(ctx, direct)
