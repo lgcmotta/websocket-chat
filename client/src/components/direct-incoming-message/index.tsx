@@ -1,6 +1,6 @@
 import { format } from "date-fns"
 
-const IncomingMessage = () => {
+const DirectIncomingMessage = () => {
   const text = "Hello!"
   const now = new Date()
   const time = format(now, "HH:mm:ss")
@@ -13,12 +13,14 @@ const IncomingMessage = () => {
                       pb-2
                       pl-4
                       pr-4
-                      bg-[#7c3aed]
+                      bg-[#4f46e5]
                       rounded-lg
                       w-1/3">
         <div className="flex flex-row">
           <div className="w-full items-center flex flex-row justify-start">
-            <span className="right-0 text-xs">{from}</span>
+            <span className="right-0 text-xs">{from}
+              <span className="pl-1 italic font-sans">@direct</span>
+            </span>
           </div>
           <div className="w-full items-center flex flex-row justify-end">
             <span className="right-0 text-xs">{time}</span>
@@ -34,4 +36,4 @@ const IncomingMessage = () => {
   )
 }
 
-export default IncomingMessage
+export default DirectIncomingMessage

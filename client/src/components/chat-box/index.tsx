@@ -1,6 +1,8 @@
-import IncomingMessage from "../incoming-message"
+import BroadcastIncomingMessage from "../broadcast-incoming-message"
+import DirectIncomingMessage from "../direct-incoming-message"
 import MessageInput from "../message-input"
-import OutgoingMessage from "../outgoing-message"
+import BroadcastOutgoingMessage from "../broadcast-outgoing-message"
+import DirectOutgoingMessage from "../direct-outgoing-message"
 
 const ChatBox = () => {
   return (
@@ -27,22 +29,22 @@ const ChatBox = () => {
                       bg-[#18181b]
                       overflow-x-hidden
                       overflow-y-auto">
-        <IncomingMessage />
-        <OutgoingMessage />
-        <IncomingMessage />
-        <OutgoingMessage />
-        <IncomingMessage />
-        <OutgoingMessage />
-        <IncomingMessage />
-        <OutgoingMessage />
-        <IncomingMessage />
-        <OutgoingMessage />
-        <IncomingMessage />
-        <OutgoingMessage />
-        <IncomingMessage />
-        <OutgoingMessage />
-        <IncomingMessage />
-        <OutgoingMessage />
+        <BroadcastIncomingMessage />
+        <BroadcastOutgoingMessage />
+        <DirectIncomingMessage />
+        <BroadcastOutgoingMessage />
+        <BroadcastIncomingMessage />
+        <DirectOutgoingMessage />
+        <BroadcastIncomingMessage />
+        <BroadcastOutgoingMessage />
+        <BroadcastIncomingMessage />
+        <BroadcastOutgoingMessage />
+        <BroadcastIncomingMessage />
+        <BroadcastOutgoingMessage />
+        <BroadcastIncomingMessage />
+        <BroadcastOutgoingMessage />
+        <BroadcastIncomingMessage />
+        <BroadcastOutgoingMessage />
       </div>
       <MessageInput />
     </div>
