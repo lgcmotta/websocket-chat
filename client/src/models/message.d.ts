@@ -5,7 +5,7 @@ export interface IMessageReceived {
   receiver: IMember;
   content: string;
   receivedAt: string;
-  type: "broadcast" | "direct";
+  type: "broadcast" | "direct" | "system";
 }
 
 export interface IMessageReceivedProps {

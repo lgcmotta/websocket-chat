@@ -7,6 +7,7 @@ import { websocketClient } from "../../api/ws"
 import { IMessageReceived } from "../../models/message"
 import MessagesContainer from "../messages-container"
 import OutgoingMessage from "../outgoing-message"
+import SystemMessage from "../system-message"
 
 const ChatBox = () => {
   const { state, setState } = useChatContext()
@@ -52,6 +53,20 @@ const ChatBox = () => {
     <MessagesContainer>
       <MessagesBox>
         {renderMessages()}
+        <SystemMessage message={{
+          content: "Motta just joined the chat",
+          receivedAt: new Date().toString(),
+          sender: {
+            nickname: "@system",
+            connectionId: "123"
+          },
+          receiver: {
+            connectionId: "",
+            nickname: "@everyone"
+          },
+          type: "system"
+        }} />
+
       </MessagesBox>
       <MessageInput />
     </MessagesContainer>
