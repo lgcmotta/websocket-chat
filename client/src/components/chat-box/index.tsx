@@ -8,6 +8,8 @@ import { IMessageReceived } from "../../models/message"
 import MessagesContainer from "../messages-container"
 import OutgoingMessage from "../outgoing-message"
 import SystemMessage from "../system-message"
+import { isMembersList, isMessage } from "../../utils/type-checks"
+import { IConnectedMembers } from "../../models/member"
 
 const ChatBox = () => {
   const { state, setState } = useChatContext()
@@ -25,7 +27,23 @@ const ChatBox = () => {
   }, [myself])
 
   const onMessageReceived = (event: any) => {
-    const message = JSON.parse(event.data) as IMessageReceived
+    const received = JSON.parse(event.data)
+
+    if (isMessage(received)) {
+      const message = received as IMessageReceived
+      handleMessage(message)
+      return;
+    }
+
+    if (isMembersList(received)) {
+      const connectedMembers = received as IConnectedMembers;
+      setState(prev => {
+        return { ...prev, members: connectedMembers.members }
+      })
+    }
+  }
+
+  const handleMessage = (message: IMessageReceived) => {
     const { receiver } = message
     if (receiver.nickname == myself.nickname && myself.connectionId == "") {
       setState(prev => {
@@ -37,6 +55,7 @@ const ChatBox = () => {
       })
     }
   }
+
 
   const renderMessages = (): JSX.Element[] => {
     if (myself.connectionId == "") return []

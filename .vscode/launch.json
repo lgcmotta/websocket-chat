@@ -13,6 +13,7 @@
       "name": "debug",
       "url": "https://localhost:5173/",
       "webRoot": "${workspaceFolder}/client/src",
+      //"userDataDir": false
     }
   ]
 }

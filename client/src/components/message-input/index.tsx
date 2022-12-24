@@ -1,4 +1,9 @@
-const MessageInput = () => {
+import { FC, createRef } from "react"
+
+const MessageInput: FC = () => {
+  const textRef = createRef<HTMLTextAreaElement>()
+
+
   return (
     <div className="p-2 w-full h-48 items-center flex flex-row justify-center">
       <textarea className="h-full
@@ -7,7 +12,9 @@ const MessageInput = () => {
                           rounded-md
                           border-2
                           border-white
-                          bg-[#4b5563]"/>
+                          bg-[#4b5563]"
+
+        ref={textRef} />
       <button className="ml-2 w-1/12 h-full bg-[#7c3aed]">Send</button>
     </div>
   )

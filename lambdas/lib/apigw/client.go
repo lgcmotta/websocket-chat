@@ -84,12 +84,46 @@ func (client *ApiClient) SendMessage(ctx context.Context, message *messages.Mess
 	_, err = client.client.PostToConnection(ctx, input)
 
 	if err != nil {
-		logger.Log.FailedToSendMessage(message.Sender.ConnectionId,
+		logger.Log.FailedToSendMessage(
+			message.Sender.ConnectionId,
 			message.Receiver.ConnectionId,
 			err,
 		)
 		errs = multierr.Append(errs, err)
 	}
 
+	return errs
+}
+
+func (client *ApiClient) SendConnectedClients(ctx context.Context, receiver *messages.Member, members *messages.ConnectedMembers) error {
+	var errs error
+
+	encoded, err := members.Encode()
+
+	if err != nil {
+		logger.Log.FailedToEncodeOutput(
+			receiver.ConnectionId,
+			receiver.ConnectionId,
+			err,
+		)
+
+		errs = multierr.Append(errs, err)
+	}
+
+	input := &apigatewaymanagementapi.PostToConnectionInput{
+		ConnectionId: aws.String(receiver.ConnectionId),
+		Data:         encoded,
+	}
+
+	_, err = client.client.PostToConnection(ctx, input)
+
+	if err != nil {
+		logger.Log.FailedToSendMessage(
+			receiver.ConnectionId,
+			receiver.ConnectionId,
+			err,
+		)
+		errs = multierr.Append(errs, err)
+	}
 	return errs
 }

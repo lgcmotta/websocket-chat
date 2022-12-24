@@ -45,6 +45,11 @@ export default class ChatWebSocketClient {
     this.publish(direct)
   }
 
+  requestMembersList() {
+    if (this.socket == undefined) return
+    this.socket.send(JSON.stringify({ action: "members" }))
+  }
+
   private publish(message: string) {
     if (this.socket == undefined) return
     this.socket.send(message)

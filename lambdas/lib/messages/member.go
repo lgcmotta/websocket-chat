@@ -1,6 +1,9 @@
 package messages
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type Member struct {
 	ConnectionId string `json:"connectionId"`
@@ -20,4 +23,12 @@ func (member *Member) GetJoiningMessage() string {
 
 func (member *Member) GetLeavingMessage() string {
 	return fmt.Sprintf("%s has left the chat", member.Nickname)
+}
+
+type ConnectedMembers struct {
+	Members []*Member `json:"members"`
+}
+
+func (connected *ConnectedMembers) Encode() ([]byte, error) {
+	return json.Marshal(connected)
 }

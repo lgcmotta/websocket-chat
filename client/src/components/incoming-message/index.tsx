@@ -5,9 +5,9 @@ import { IMessageReceivedProps } from "../../models/message"
 const IncomingMessage: FC<IMessageReceivedProps> = ({ message }) => {
   const { sender, content, receivedAt, type } = message;
 
-  const { color, from } = type == "broadcast"
-    ? { color: "#818cf8", from: "@everyone" }
-    : { color: "#6366f1", from: "@direct" };
+  const { color, receiver } = type == "broadcast"
+    ? { color: "#818cf8", receiver: "@everyone" }
+    : { color: "#6366f1", receiver: "@direct" };
 
   return (
     <div className="w-full">
@@ -15,7 +15,7 @@ const IncomingMessage: FC<IMessageReceivedProps> = ({ message }) => {
         <div className="flex flex-row">
           <div className="w-full items-center flex flex-row justify-start">
             <span className="right-0 text-xs">{sender.nickname}
-              <span className="pl-1 italic font-sans">{from}</span>
+              <span className="pl-1 italic font-sans">to {receiver}</span>
             </span>
           </div>
           <div className="w-full items-center flex flex-row justify-end">
