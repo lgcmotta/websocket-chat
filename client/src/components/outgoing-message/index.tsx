@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { IMessageReceivedProps } from "../../models/message";
 
 const OutgoingMessage: FC<IMessageReceivedProps> = ({ message }) => {
@@ -15,7 +15,7 @@ const OutgoingMessage: FC<IMessageReceivedProps> = ({ message }) => {
       <div className={classes}>
         <div className="flex flex-row">
           <div className="w-full items-center flex flex-row justify-start">
-            <span className="right-0 text-xs">{format(receivedAt, "HH:mm:ss")}</span>
+            <span className="right-0 text-xs">{format(parseISO(receivedAt), "HH:mm:ss")}</span>
           </div>
           <div className="w-full items-center flex flex-row justify-end">
             <span className="right-0 text-xs">{receiver.nickname}

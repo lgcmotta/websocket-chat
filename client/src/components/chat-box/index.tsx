@@ -1,9 +1,12 @@
+import MessagesBox from "../messages-box"
 import MessageInput from "../message-input"
 import IncomingMessage from "../incoming-message"
 import { useChatContext } from "../../context/chat-context"
 import { useEffect } from "react"
 import { websocketClient } from "../../api/ws"
 import { IMessageReceived } from "../../models/message"
+import MessagesContainer from "../messages-container"
+import OutgoingMessage from "../outgoing-message"
 
 const ChatBox = () => {
   const { state, setState } = useChatContext()
@@ -13,54 +16,45 @@ const ChatBox = () => {
     if (myself.nickname == "" || websocketClient.isConnected()) return;
 
     websocketClient.connect()
-    websocketClient.onMessageReceived(event => {
-      const message = JSON.parse(event.data) as IMessageReceived
-      const { sender } = message
-      if (sender.nickname == myself.nickname && myself.connectionId == "") {
-        setState(prev => {
-          return { ...prev, myself: { ...prev.myself, connectionId: sender.connectionId }, messages: [...prev.messages, message] }
-        })
-      } else {
-        setState(prev => {
-          return { ...prev, messages: [...prev.messages, message] }
-        })
-      }
-    })
+    websocketClient.onMessageReceived(onMessageReceived)
     setTimeout(() => {
       websocketClient.join({ action: "join", nickname: myself.nickname })
-    }, 5000)
+    }, 3000)
 
   }, [myself])
 
+  const onMessageReceived = (event: any) => {
+    const message = JSON.parse(event.data) as IMessageReceived
+    const { sender } = message
+    if (sender.nickname == myself.nickname && myself.connectionId == "") {
+      setState(prev => {
+        return { ...prev, myself: { ...prev.myself, connectionId: sender.connectionId }, messages: [...prev.messages, message] }
+      })
+    } else {
+      setState(prev => {
+        return { ...prev, messages: [...prev.messages, message] }
+      })
+    }
+  }
+
+  const renderMessages = (): JSX.Element[] => {
+    if (myself.connectionId == "") return []
+
+    return messages.map((message, index) => {
+      if (message.sender.connectionId == myself.connectionId) {
+        return <OutgoingMessage key={index} message={message} />
+      }
+      return <IncomingMessage key={index} message={message} />
+    });
+  }
 
   return (
-    <div className="w-full
-                    h-full
-                    mr-4
-                    rounded-md
-                    border-2
-                    border-white
-                    items-center
-                    flex
-                    flex-col
-                    justify-between 
-                    justify-center">
-      <div className="h-full
-                      w-full
-                      pt-4
-                      flex
-                      flex-col
-                      items-center 
-                      rounded-md
-                      border-b-2
-                      border-white
-                      bg-[#18181b]
-                      overflow-x-hidden
-                      overflow-y-auto">
-        {messages.map((message, index) => <IncomingMessage key={index} message={message} />)}
-      </div>
+    <MessagesContainer>
+      <MessagesBox>
+        {renderMessages()}
+      </MessagesBox>
       <MessageInput />
-    </div>
+    </MessagesContainer>
   )
 }
 
