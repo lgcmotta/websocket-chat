@@ -26,10 +26,10 @@ const ChatBox = () => {
 
   const onMessageReceived = (event: any) => {
     const message = JSON.parse(event.data) as IMessageReceived
-    const { sender } = message
-    if (sender.nickname == myself.nickname && myself.connectionId == "") {
+    const { receiver } = message
+    if (receiver.nickname == myself.nickname && myself.connectionId == "") {
       setState(prev => {
-        return { ...prev, myself: { ...prev.myself, connectionId: sender.connectionId }, messages: [...prev.messages, message] }
+        return { ...prev, myself: { ...prev.myself, connectionId: receiver.connectionId }, messages: [...prev.messages, message] }
       })
     } else {
       setState(prev => {
@@ -42,9 +42,14 @@ const ChatBox = () => {
     if (myself.connectionId == "") return []
 
     return messages.map((message, index) => {
+      if (message.type == "system") {
+        return <SystemMessage key={index} message={message} />
+      }
+
       if (message.sender.connectionId == myself.connectionId) {
         return <OutgoingMessage key={index} message={message} />
       }
+
       return <IncomingMessage key={index} message={message} />
     });
   }
@@ -53,20 +58,6 @@ const ChatBox = () => {
     <MessagesContainer>
       <MessagesBox>
         {renderMessages()}
-        <SystemMessage message={{
-          content: "Motta just joined the chat",
-          receivedAt: new Date().toString(),
-          sender: {
-            nickname: "@system",
-            connectionId: "123"
-          },
-          receiver: {
-            connectionId: "",
-            nickname: "@everyone"
-          },
-          type: "system"
-        }} />
-
       </MessagesBox>
       <MessageInput />
     </MessagesContainer>
