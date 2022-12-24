@@ -5,14 +5,11 @@ import { IMessageReceivedProps } from "../../models/message";
 const OutgoingMessage: FC<IMessageReceivedProps> = ({ message }) => {
   const { receiver, content, receivedAt, type } = message;
 
-  const { color, from } = type == "broadcast"
-    ? { color: "#4b5563", from: "@everyone" }
-    : { color: "#9ca3af", from: "@direct" };
+  const from = type == "broadcast" ? "@everyone" : "@direct"
 
-  const classes = `m-2 mr-4 pt-2 pb-2 pl-4 pr-4 bg-[${color}] rounded-lg w-1/3 float-right`
   return (
     <div className="w-full">
-      <div className={classes}>
+      <div className={"m-2 mr-4 pt-2 pb-2 pl-4 pr-4 rounded-lg w-1/3 float-right bg-[#52525b]"}>
         <div className="flex flex-row">
           <div className="w-full items-center flex flex-row justify-start">
             <span className="right-0 text-xs">{format(parseISO(receivedAt), "HH:mm:ss")}</span>

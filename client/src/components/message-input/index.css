@@ -1,0 +1,25 @@
+ul.react-autocomplete-input {
+  background-color: #4b5563 !important;
+  border-radius: 0.375rem !important;
+  border-color: white !important;
+}
+
+ul.react-autocomplete-input>li {
+  background-color: #4b5563 !important;
+  border-radius: 0.375rem !important;
+  border-color: white !important;
+}
+
+ul.react-autocomplete-input>li.active {
+  background-color: #4b5563 !important;
+  border-radius: 0.375rem !important;
+  border-color: white !important;
+  border-width: 2px;
+}
+
+.EmojiPickerReact {
+  left: 26px !important;
+  bottom: 217px !important;
+  float: left;
+  position: absolute !important;
+}

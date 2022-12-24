@@ -42,7 +42,7 @@ const Nickname: FC = () => {
         ref={inputRef}
         type="text" />
       <div className="pr-4 pl-4 pt-2 w-full items-center flex-col flex justify-center">
-        <button className="w-full mt-2 bg-[#7c3aed] rounded-md border-2"
+        <button className="w-full mt-2 bg-[#818cf8] rounded-md border-2"
           onClick={onClick}>{buttonText}</button>
       </div>
     </div>
