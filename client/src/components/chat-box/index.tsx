@@ -1,9 +1,38 @@
 import MessageInput from "../message-input"
 import IncomingMessage from "../incoming-message"
-import { useSelector } from "../../context/chat-context"
+import { useChatContext } from "../../context/chat-context"
+import { useEffect } from "react"
+import { websocketClient } from "../../api/ws"
+import { IMessageReceived } from "../../models/message"
 
 const ChatBox = () => {
-  const messages = useSelector(state => state.messages)
+  const { state, setState } = useChatContext()
+  const { myself, messages } = state;
+
+  useEffect(() => {
+    if (myself.nickname == "" || websocketClient.isConnected()) return;
+
+    websocketClient.connect()
+    websocketClient.onMessageReceived(event => {
+      const message = JSON.parse(event.data) as IMessageReceived
+      const { sender } = message
+      if (sender.nickname == myself.nickname && myself.connectionId == "") {
+        setState(prev => {
+          return { ...prev, myself: { ...prev.myself, connectionId: sender.connectionId }, messages: [...prev.messages, message] }
+        })
+      } else {
+        setState(prev => {
+          return { ...prev, messages: [...prev.messages, message] }
+        })
+      }
+    })
+    setTimeout(() => {
+      websocketClient.join({ action: "join", nickname: myself.nickname })
+    }, 5000)
+
+  }, [myself])
+
+
   return (
     <div className="w-full
                     h-full
@@ -28,7 +57,6 @@ const ChatBox = () => {
                       bg-[#18181b]
                       overflow-x-hidden
                       overflow-y-auto">
-        {/* TODO: map app messages */}
         {messages.map((message, index) => <IncomingMessage key={index} message={message} />)}
       </div>
       <MessageInput />

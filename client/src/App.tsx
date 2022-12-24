@@ -1,12 +1,10 @@
-import ChatBox from "./components/chat-box"
-import MembersList from "./components/members-list"
 import { ChatContextProvider } from "./context/chat-context"
+import Chat from "./page";
 
 function App() {
   return (
     <ChatContextProvider>
-      <ChatBox />
-      <MembersList />
+      <Chat />
     </ChatContextProvider>
   );
 }

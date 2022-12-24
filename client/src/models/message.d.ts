@@ -12,15 +12,23 @@ export interface IMessageReceivedProps {
   message: IMessageReceived;
 }
 
+type Action = "join" | "broadcast" | "direct";
 export interface IMessage {
-  action: "join" | "direct" | "broadcast";
+  action: Action;
 }
 
-export interface IBroadcastMessage extends IMessage {
+export interface IJoinMessage extends IMessage{
+  action: "join";
+  nickname: string;
+}
+
+export interface IBroadcastMessage extends IMessage{
+  action: "broadcast";
   content: string;
 }
 
-export interface IDirectMessage extends IMessage {
+export interface IDirectMessage extends IMessage{
+  action: "direct";
   content: string;
   receiver: String;
 }
