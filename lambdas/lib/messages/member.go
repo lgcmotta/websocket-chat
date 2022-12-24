@@ -15,9 +15,9 @@ func NewMember(connectionId, nickname string) *Member {
 }
 
 func (member *Member) GetJoiningMessage() string {
-	return fmt.Sprintf(`"%s just joined the chat"`, member.Nickname)
+	return fmt.Sprintf("%s just joined the chat", member.Nickname)
 }
 
 func (member *Member) GetLeavingMessage() string {
-	return fmt.Sprintf(`"%s has left the chat"`, member.Nickname)
+	return fmt.Sprintf("%s has left the chat", member.Nickname)
 }

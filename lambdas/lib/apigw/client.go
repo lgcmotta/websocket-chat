@@ -43,7 +43,14 @@ func NewAPIGatewayManagementClient(cfg *aws.Config, domain, stage string) *ApiCl
 func (client *ApiClient) BroadcastMessage(ctx context.Context, message *messages.BroadcastMessageOutput) error {
 	var errs error
 	for _, receiver := range message.Receivers {
-		direct := messages.NewMessageOutput(message.Sender, receiver, message.Content, message.ReceivedAt, "broadcast")
+		var direct *messages.MessageOutput
+
+		if message.MessageType == "system" {
+			system := messages.NewMember("", "@system")
+			direct = messages.NewMessageOutput(system, receiver, message.Content, message.ReceivedAt, message.MessageType)
+		} else {
+			direct = messages.NewMessageOutput(message.Sender, receiver, message.Content, message.ReceivedAt, message.MessageType)
+		}
 
 		err := client.SendMessage(ctx, direct)
 

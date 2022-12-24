@@ -58,7 +58,7 @@ func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (a
 
 	receivedAt := time.Now()
 
-	broadcast := messages.NewBroadcastMessageOutput(sender.Cast(), receivers, broadcastInput.Content, &receivedAt)
+	broadcast := messages.NewBroadcastMessageOutput(sender.Cast(), receivers, broadcastInput.Content, &receivedAt, "broadcast")
 
 	apigw.Client.BroadcastMessage(ctx, broadcast)
 

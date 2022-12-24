@@ -60,7 +60,16 @@ func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (a
 		"direct",
 	)
 
+	replyToSender := messages.NewMessageOutput(
+		sender.Cast(),
+		sender.Cast(),
+		directInput.Content,
+		&receivedAt,
+		"direct",
+	)
+
 	apigw.Client.SendMessage(ctx, direct)
+	apigw.Client.SendMessage(ctx, replyToSender)
 
 	return apigw.OkResponse(), nil
 }
