@@ -5,8 +5,8 @@ import (
 )
 
 type DirectMessageInput struct {
-	Receiver string `json:"receiver"`
-	Content  string `json:"content"`
+	Receivers []string `json:"receivers"`
+	Content   string   `json:"content"`
 }
 
 func (input *DirectMessageInput) Decode(message []byte) (*DirectMessageInput, error) {

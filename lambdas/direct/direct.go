@@ -34,12 +34,19 @@ func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (a
 		return apigw.BadRequestResponse(), err
 	}
 
-	receiver, err := db.Instance.GetMember(ctx, directInput.Receiver)
+	receivers := make([]*db.Member, 0)
 
-	if err != nil {
-		logger.Log.FailedToRetrieveReceiver(req, err)
+	for _, conncetionId := range directInput.Receivers {
 
-		return apigw.InternalServerErrorResponse(), err
+		receiver, err := db.Instance.GetMember(ctx, conncetionId)
+
+		if err != nil {
+			logger.Log.FailedToRetrieveReceiver(req, err)
+
+			return apigw.InternalServerErrorResponse(), err
+		}
+		receivers = append(receivers, receiver)
+
 	}
 
 	sender, err := db.Instance.GetMember(ctx, req.RequestContext.ConnectionID)
@@ -52,14 +59,6 @@ func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (a
 
 	receivedAt := time.Now()
 
-	direct := messages.NewMessageOutput(
-		sender.Cast(),
-		receiver.Cast(),
-		directInput.Content,
-		&receivedAt,
-		"direct",
-	)
-
 	replyToSender := messages.NewMessageOutput(
 		sender.Cast(),
 		sender.Cast(),
@@ -68,8 +67,20 @@ func handle(ctx context.Context, req *events.APIGatewayWebsocketProxyRequest) (a
 		"direct",
 	)
 
-	apigw.Client.SendMessage(ctx, direct)
 	apigw.Client.SendMessage(ctx, replyToSender)
+
+	for _, receiver := range receivers {
+
+		direct := messages.NewMessageOutput(
+			sender.Cast(),
+			receiver.Cast(),
+			directInput.Content,
+			&receivedAt,
+			"direct",
+		)
+
+		apigw.Client.SendMessage(ctx, direct)
+	}
 
 	return apigw.OkResponse(), nil
 }

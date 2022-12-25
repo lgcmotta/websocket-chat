@@ -15,31 +15,46 @@ const MessageInput: FC = () => {
   const { members, myself, everyone } = state;
 
   const [showEmojis, setShowEmojis] = useState<boolean>(false)
-  const [receiver, setReceiver] = useState<IMember>(everyone)
+  const [receivers, setReceivers] = useState<IMember[]>([everyone])
   const [content, setContent] = useState<string>("")
 
-  const mentions = [everyone.nickname, ...members.filter(member => member.nickname != myself.nickname).map(member => member.nickname)]
+  const availableMentions = [
+    everyone.nickname,
+    ...members.filter(member => member.nickname != myself.nickname).map(member => member.nickname)
+  ]
 
-  const handleMention = (receiver: string) => {
-    const re = /\B@\w+/g;
+  const handleMention = (content: string) => {
 
-    const matches = receiver.match(re)
+    const mentions = findMentionsInContent(content)
 
-    if (!matches || matches == null) return;
-
-    const to = members.find(member => member.nickname == matches[0].replace("@", ""))
-
-    if (to) {
-      setReceiver(to)
-    }
+    setReceivers(mentions)
   }
 
-  const handleMessageContentChange = (e: string) => {
-    setContent(e)
+  const handleMessageContentChange = (content: string) => {
+    setContent(content)
 
-    if (!receiver || e.includes(`@${receiver.nickname}`)) return;
+    const mentions = findMentionsInContent(content)
 
-    setReceiver(everyone)
+    setReceivers(mentions)
+  }
+
+  const findMentionsInContent = (content: string): IMember[] => {
+    const mentionsRegex = /\B@\w+/g;
+
+    const matches = content.match(mentionsRegex)
+
+    if (!matches || matches == null) return [everyone];
+
+    if (matches.some(match => match.replace("@", "") == everyone.nickname)
+      || (members.length > 2 && members
+        .filter(member => member.connectionId != myself.connectionId)
+        .every(member => matches.some(m => m.replace("@", "") == member.nickname)))) {
+      return [everyone]
+    }
+
+    const mentions = members.filter(member => matches.some(m => m.replace("@", "") == member.nickname))
+
+    return mentions
   }
 
   const handleSendMessage = () => {
@@ -51,7 +66,7 @@ const MessageInput: FC = () => {
 
     const message = ref.current?.value
 
-    if (receiver.nickname == everyone.nickname) {
+    if (receivers.includes(everyone)) {
       websocketClient.broadcast({
         action: "broadcast",
         content: message ?? ""
@@ -62,13 +77,14 @@ const MessageInput: FC = () => {
 
     websocketClient.direct({
       action: "direct",
-      receiver: receiver.connectionId,
+      receivers: receivers.map(receiver => receiver.connectionId),
       content: message ?? ""
     })
 
+
     clearContent()
 
-    setReceiver(everyone)
+    setReceivers([everyone])
   }
 
   const handleShowEmoji = () => setShowEmojis(prev => !prev)
@@ -86,7 +102,7 @@ const MessageInput: FC = () => {
         <button className="bg-transparent border-2 rounded-md" onClick={handleShowEmoji}>
           {search("smile")[0].char}
         </button>
-        <p className="ml-2 text-sm">To: {receiver.nickname}</p>
+        <p className="ml-2 text-sm">To: {receivers.map(receiver => receiver.nickname).join(', ')}</p>
         {showEmojis && <EmojiPicker theme={Theme.DARK} width="400px" onEmojiClick={handleEmojiClick} />}
       </div>
       <div className="w-full h-48 items-center flex flex-row justify-center">
@@ -106,7 +122,7 @@ const MessageInput: FC = () => {
           onSelect={handleMention}
           onChange={handleMessageContentChange}
           options={{
-            "@": mentions,
+            "@": availableMentions,
           }}
           ref={textRef} />
         <button className="ml-2 w-1/12 h-full bg-[#818cf8]" onClick={handleSendMessage}>Send</button>

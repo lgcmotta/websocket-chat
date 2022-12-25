@@ -30,5 +30,5 @@ export interface IBroadcastMessage extends IMessage{
 export interface IDirectMessage extends IMessage{
   action: "direct";
   content: string;
-  receiver: String;
+  receivers: string[];
 }
