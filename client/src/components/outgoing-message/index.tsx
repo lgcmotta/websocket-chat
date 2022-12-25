@@ -6,7 +6,7 @@ const OutgoingMessage: FC<IMessageReceivedProps> = ({ message }) => {
   const { receiver, content, receivedAt, type, sender } = message;
 
   const from = type == "broadcast" ? "@everyone" : "@direct"
-  console.log(sender)
+
   return (
     <div className="w-full">
       <div className={"m-2 mr-4 pt-2 pb-2 pl-4 pr-4 rounded-lg w-1/3 float-right bg-[#52525b]"}>
