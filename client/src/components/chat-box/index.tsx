@@ -1,19 +1,16 @@
-import MessagesBox from "../messages-box"
-import MessageInput from "../message-input"
-import IncomingMessage from "../incoming-message"
-import SystemMessage from "../system-message"
-import MessagesContainer from "../messages-container"
-import OutgoingMessage from "../outgoing-message"
+import { MessagesContainer, MessagesBox } from "./divs"
+import { FC, useEffect } from "react"
 import { useChatContext } from "../../context/chat-context"
-import { useEffect } from "react"
 import { websocketClient } from "../../api/ws"
 import { IMessageReceived } from "../../models/message"
 import { isMembersList, isMessage } from "../../utils/type-checks"
 import { IConnectedMembers } from "../../models/member"
+import MessageInput from "../message-input"
+import ChatMessages from "../chat-messages"
 
-const ChatBox = () => {
+const ChatBox: FC = () => {
   const { state, setState } = useChatContext()
-  const { myself, messages, members } = state;
+  const { myself } = state;
 
   useEffect(() => {
     if (myself.nickname == "" || websocketClient.isConnected()) return;
@@ -57,27 +54,10 @@ const ChatBox = () => {
     }
   }
 
-
-  const renderMessages = (): JSX.Element[] => {
-    if (myself.connectionId == "") return []
-
-    return messages.map((message, index) => {
-      if (message.type == "system") {
-        return <SystemMessage key={index} message={message} />
-      }
-
-      if (message.sender.connectionId == myself.connectionId) {
-        return <OutgoingMessage key={index} message={message} />
-      }
-
-      return <IncomingMessage key={index} message={message} />
-    });
-  }
-
   return (
     <MessagesContainer>
       <MessagesBox>
-        {renderMessages()}
+        <ChatMessages />
       </MessagesBox>
       <MessageInput />
     </MessagesContainer>
