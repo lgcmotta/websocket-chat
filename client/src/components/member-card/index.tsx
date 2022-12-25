@@ -2,7 +2,6 @@ import { FC } from "react"
 import { IMemberCardProps } from "../../models/member"
 
 const MemberCard: FC<IMemberCardProps> = ({ member }) => {
-
   const { nickname } = member;
 
   if (!nickname || nickname == "") {

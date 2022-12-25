@@ -1,5 +1,5 @@
-import ChatBox from "./components/chat-box";
-import MembersList from "./components/members-list";
+import Chat from "./components/chat";
+import SideBar from "./components/side-bar";
 import { ChatContextProvider } from "./context/chat-context"
 
 (window as any).global = window;
@@ -7,8 +7,8 @@ import { ChatContextProvider } from "./context/chat-context"
 function App() {
   return (
     <ChatContextProvider>
-      <ChatBox />
-      <MembersList />
+      <Chat />
+      <SideBar />
     </ChatContextProvider>
   );
 }

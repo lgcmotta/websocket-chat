@@ -48,8 +48,7 @@ function useStateSelector<T>(selector: (state: IChatState) => T) {
 
 const ChatContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
-  const [state
-    , setState] = useState<IChatState>(initialState)
+  const [state, setState] = useState<IChatState>(initialState)
 
   return (
     useMemo(() => <ChatContext.Provider value={{ state, setState }} children={children} />, [state])

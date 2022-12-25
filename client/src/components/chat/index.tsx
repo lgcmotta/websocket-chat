@@ -8,7 +8,7 @@ import { IConnectedMembers } from "../../models/member"
 import MessageInput from "../message-input"
 import ChatMessages from "../chat-messages"
 
-const ChatBox: FC = () => {
+const Chat: FC = () => {
   const { state, setState } = useChatContext()
   const { myself } = state;
 
@@ -64,4 +64,4 @@ const ChatBox: FC = () => {
   )
 }
 
-export default ChatBox
+export default Chat
