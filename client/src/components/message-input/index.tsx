@@ -1,7 +1,7 @@
 import { FC, createRef, useState, RefObject } from "react"
 import { useChatContext } from "../../context/chat-context"
 import TextInput from 'react-autocomplete-input';
-import EmojiPicker, { Theme } from 'emoji-picker-react';
+import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 import search from "@jukben/emoji-search"
 import 'react-autocomplete-input/dist/bundle.css';
 import "./index.css"
@@ -11,25 +11,30 @@ import { websocketClient } from "../../api/ws";
 const MessageInput: FC = () => {
   const textRef = createRef<HTMLTextAreaElement>()
   const navRef = createRef<HTMLDivElement>();
-  const everyone = { nickname: "@everyone", connectionId: "" }
-
+  const { state } = useChatContext()
+  const { members, myself, everyone } = state;
 
   const [showEmojis, setShowEmojis] = useState<boolean>(false)
   const [receiver, setReceiver] = useState<IMember>(everyone)
   const [content, setContent] = useState<string>("")
-  const { state } = useChatContext()
-  const { members, myself } = state;
 
-  const onSelect = (receiver: string) => {
-    const nickname = receiver.replace("@", "")
-    const to = members.find(member => member.nickname == nickname)
+  const mentions = [everyone.nickname, ...members.filter(member => member.nickname != myself.nickname).map(member => member.nickname)]
+
+  const handleMention = (receiver: string) => {
+    const re = /\B@\w+/g;
+
+    const matches = receiver.match(re)
+
+    if (!matches || matches == null) return;
+
+    const to = members.find(member => member.nickname == matches[0].replace("@", ""))
+
     if (to) {
       setReceiver(to)
     }
-
   }
 
-  const onChange = (e: string) => {
+  const handleMessageContentChange = (e: string) => {
     setContent(e)
 
     if (!receiver || e.includes(`@${receiver.nickname}`)) return;
@@ -37,12 +42,7 @@ const MessageInput: FC = () => {
     setReceiver(everyone)
   }
 
-
-  const handleShowEmoji = (e: any) => {
-    setShowEmojis(prev => !prev)
-  }
-
-  const handleSend = () => {
+  const handleSendMessage = () => {
     const ref = ((textRef.current as any).refInput as RefObject<HTMLTextAreaElement>)
     if (!websocketClient.isConnected()) {
       window.alert("You're not connected to the chat")
@@ -68,6 +68,14 @@ const MessageInput: FC = () => {
 
     clearContent()
 
+    setReceiver(everyone)
+  }
+
+  const handleShowEmoji = () => setShowEmojis(prev => !prev)
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setContent(prev => prev + emojiData.emoji)
+    setShowEmojis(false)
   }
 
   const clearContent = () => setContent("")
@@ -79,11 +87,11 @@ const MessageInput: FC = () => {
           {search("smile")[0].char}
         </button>
         <p className="ml-2 text-sm">To: {receiver.nickname}</p>
-        {showEmojis && <EmojiPicker theme={Theme.DARK} width="400px" />}
+        {showEmojis && <EmojiPicker theme={Theme.DARK} width="400px" onEmojiClick={handleEmojiClick} />}
       </div>
       <div className="w-full h-48 items-center flex flex-row justify-center">
         <TextInput
-          spacer=""
+
           className="h-full
                     w-full
                     p-4
@@ -95,13 +103,13 @@ const MessageInput: FC = () => {
           value={content}
           offsetY={-30}
           trigger={["@"]}
-          onSelect={onSelect}
-          onChange={onChange}
+          onSelect={handleMention}
+          onChange={handleMessageContentChange}
           options={{
-            "@": members.filter(m => m.connectionId != myself.connectionId).map(m => m.nickname),
+            "@": mentions,
           }}
           ref={textRef} />
-        <button className="ml-2 w-1/12 h-full bg-[#818cf8]" onClick={handleSend}>Send</button>
+        <button className="ml-2 w-1/12 h-full bg-[#818cf8]" onClick={handleSendMessage}>Send</button>
       </div>
     </div>
   )

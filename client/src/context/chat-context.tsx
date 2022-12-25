@@ -20,7 +20,10 @@ interface IChatState {
   members: IMember[],
   myself: IMember,
   messages: IMessageReceived[]
+  everyone: IMember
 }
+
+const everyone: IMember = { nickname: "everyone", connectionId: "" }
 
 const initialState: IChatState = {
   members: [],
@@ -28,8 +31,10 @@ const initialState: IChatState = {
     connectionId: "",
     nickname: ""
   },
-  messages: []
+  messages: [],
+  everyone: everyone
 }
+
 
 const ChatContext = createContext<IChatContextProps>({} as IChatContextProps)
 

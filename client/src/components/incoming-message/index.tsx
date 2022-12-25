@@ -13,7 +13,7 @@ const IncomingMessage: FC<IMessageReceivedProps> = ({ message }) => {
         <div className="flex flex-row">
           <div className="w-full items-center flex flex-row justify-start">
             <span className="right-0 text-xs">{sender.nickname}
-              <span className="pl-1 italic font-sans">to {from}</span>
+              <span className="pl-1 italic font-sans">{from}</span>
             </span>
           </div>
           <div className="w-full items-center flex flex-row justify-end">

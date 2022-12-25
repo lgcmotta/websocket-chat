@@ -1,19 +1,19 @@
 import MessagesBox from "../messages-box"
 import MessageInput from "../message-input"
 import IncomingMessage from "../incoming-message"
+import SystemMessage from "../system-message"
+import MessagesContainer from "../messages-container"
+import OutgoingMessage from "../outgoing-message"
 import { useChatContext } from "../../context/chat-context"
 import { useEffect } from "react"
 import { websocketClient } from "../../api/ws"
 import { IMessageReceived } from "../../models/message"
-import MessagesContainer from "../messages-container"
-import OutgoingMessage from "../outgoing-message"
-import SystemMessage from "../system-message"
 import { isMembersList, isMessage } from "../../utils/type-checks"
 import { IConnectedMembers } from "../../models/member"
 
 const ChatBox = () => {
   const { state, setState } = useChatContext()
-  const { myself, messages } = state;
+  const { myself, messages, members } = state;
 
   useEffect(() => {
     if (myself.nickname == "" || websocketClient.isConnected()) return;
@@ -37,6 +37,7 @@ const ChatBox = () => {
 
     if (isMembersList(received)) {
       const connectedMembers = received as IConnectedMembers;
+
       setState(prev => {
         return { ...prev, members: connectedMembers.members }
       })

@@ -25,6 +25,7 @@ const MembersList: FC = () => {
       return <MemberCard key={member.connectionId} member={member} />;
     });
   }
+
   return (
     <div className="w-1/4 items-start flex-col flex justify-start rounded-md border-2 border-white overflow-hidden">
       <Nickname />
