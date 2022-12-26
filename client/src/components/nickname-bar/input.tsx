@@ -1,10 +1,10 @@
 import { FC, RefObject } from "react"
 
 interface INicknameInputProps {
-  ref: RefObject<HTMLInputElement>
+  innerRef: RefObject<HTMLInputElement>
 }
 
-const NicknameInput: FC<INicknameInputProps> = ({ ref }) => {
+const NicknameInput: FC<INicknameInputProps> = ({ innerRef }) => {
   return (
     <input className="mr-4
                         ml-4
@@ -20,7 +20,7 @@ const NicknameInput: FC<INicknameInputProps> = ({ ref }) => {
                         border-white 
                         text-left
                         bg-[#4b5563]"
-      ref={ref}
+      ref={innerRef}
       type="text" />
   )
 }

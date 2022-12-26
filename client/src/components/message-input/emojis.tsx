@@ -1,6 +1,7 @@
 import { FC, useState } from "react"
 import search from "@jukben/emoji-search"
 import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
+import "./index.css"
 
 interface IEmojisBarProps {
   onEmojiSelected: (emojiData: EmojiClickData) => void;

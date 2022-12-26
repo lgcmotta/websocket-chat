@@ -29,7 +29,7 @@ const NicknameBar: FC = () => {
   return (
     <NicknameBarDiv >
       <NicknameHeader text={title} />
-      <NicknameInput ref={inputRef} />
+      <NicknameInput innerRef={inputRef} />
       <NicknameButtonDiv>
         <NicknameButton label={buttonText} onClick={onClick} />
       </NicknameButtonDiv>
