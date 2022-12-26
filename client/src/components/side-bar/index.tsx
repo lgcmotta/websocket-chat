@@ -1,7 +1,7 @@
 import { FC, useEffect } from "react";
 import { websocketClient } from "../../api/ws";
 import { SideBarDiv, Separator, OnlineMembersDiv, OnlineMembersParagraph } from "./divs";
-import Nickname from "../nickname";
+import NicknameBar from "../nickname-bar";
 import OnlineMembers from "../online-memebrs";
 
 const SideBar: FC = () => {
@@ -16,7 +16,7 @@ const SideBar: FC = () => {
 
   return (
     <SideBarDiv>
-      <Nickname />
+      <NicknameBar />
       <Separator />
       <OnlineMembersParagraph />
       <OnlineMembersDiv>
