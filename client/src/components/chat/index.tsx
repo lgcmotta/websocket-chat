@@ -13,15 +13,18 @@ const Chat: FC = () => {
   const { myself } = state;
 
   useEffect(() => {
-    if (myself.nickname == "" || websocketClient.isConnected()) return;
+    if (myself.nickname == "") return;
 
-    websocketClient.connect()
-    websocketClient.onMessageReceived(onMessageReceived)
+    if (!websocketClient.isConnected()) {
+      websocketClient.connect()
+      websocketClient.onMessageReceived(onMessageReceived)
+    }
+
     setTimeout(() => {
       websocketClient.join({ action: "join", nickname: myself.nickname })
     }, 3000)
 
-  }, [myself])
+  }, [myself.nickname])
 
   const onMessageReceived = (event: any) => {
     const received = JSON.parse(event.data)
