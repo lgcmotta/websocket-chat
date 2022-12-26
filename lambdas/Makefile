@@ -28,6 +28,6 @@ deploy: build
 	aws lambda update-function-code --function-name arn:aws:lambda:us-east-1:${ACCOUNT_ID}:function:chat-direct	\
 		--zip-file fileb://direct/main.zip \
 		--publish
-	aws lambda update-function-code --function-name arn:aws:lambda:us-east-1:${ACCOUNT_ID}:function:chat-members	\
+	aws lambda update-function-code --function-name arn:aws:lambda:us-east-1:${ACCOUNT_ID}:function:chat-members \
 		--zip-file fileb://active-members/main.zip \
 		--publish
