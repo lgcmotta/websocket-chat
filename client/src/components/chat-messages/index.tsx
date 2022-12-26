@@ -1,12 +1,21 @@
-import { FC } from "react";
+import { FC, RefObject, useEffect } from "react";
 import { useChatContext } from "../../context/chat-context";
 import IncomingMessage from "../incoming-message";
 import OutgoingMessage from "../outgoing-message";
 import SystemMessage from "../system-message";
 
-const ChatMessages: FC = () => {
+interface IChatMessagesProps {
+  scrollRef: RefObject<HTMLDivElement>
+}
+
+const ChatMessages: FC<IChatMessagesProps> = ({ scrollRef }) => {
   const { state, } = useChatContext()
   const { myself, messages } = state;
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
   const renderMessages = (): JSX.Element[] => {
     if (myself.connectionId == "") return []

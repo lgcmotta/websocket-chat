@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from "react"
+import { FC, PropsWithChildren, RefObject } from "react"
 
 const MessagesContainer: FC<PropsWithChildren> = ({ children }) => {
   return (
@@ -36,4 +36,11 @@ const MessagesBox: FC<PropsWithChildren> = ({ children }) => {
     </div>
   )
 }
-export { MessagesContainer, MessagesBox }
+
+const ScrollToLastMessage: FC<{ scrollRef: RefObject<HTMLDivElement> }> = ({ scrollRef }) => {
+  return (
+    <div ref={scrollRef} />
+  )
+}
+
+export { MessagesContainer, MessagesBox, ScrollToLastMessage }

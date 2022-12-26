@@ -1,16 +1,17 @@
-import { MessagesContainer, MessagesBox } from "./divs"
-import { FC, useEffect } from "react"
+import { createRef, FC, useEffect } from "react"
 import { useChatContext } from "../../context/chat-context"
 import { websocketClient } from "../../api/ws"
 import { IMessageReceived } from "../../models/message"
 import { isMembersList, isMessage } from "../../utils/type-checks"
 import { IConnectedMembers } from "../../models/member"
+import { MessagesContainer, MessagesBox, ScrollToLastMessage } from "./divs"
 import MessageInput from "../message-input"
 import ChatMessages from "../chat-messages"
 
 const Chat: FC = () => {
   const { state, setState } = useChatContext()
   const { myself } = state;
+  const scrollRef = createRef<HTMLDivElement>()
 
   useEffect(() => {
     if (myself.nickname == "") return;
@@ -48,7 +49,14 @@ const Chat: FC = () => {
     const { receiver } = message
     if (receiver.nickname == myself.nickname && myself.connectionId == "") {
       setState(prev => {
-        return { ...prev, myself: { ...prev.myself, connectionId: receiver.connectionId }, messages: [...prev.messages, message] }
+        return {
+          ...prev,
+          myself: {
+            ...prev.myself,
+            connectionId: receiver.connectionId
+          },
+          messages: [...prev.messages, message]
+        }
       })
     } else {
       setState(prev => {
@@ -59,8 +67,9 @@ const Chat: FC = () => {
 
   return (
     <MessagesContainer>
-      <MessagesBox>
-        <ChatMessages />
+      <MessagesBox >
+        <ChatMessages scrollRef={scrollRef} />
+        <ScrollToLastMessage scrollRef={scrollRef} />
       </MessagesBox>
       <MessageInput />
     </MessagesContainer>
