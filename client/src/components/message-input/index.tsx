@@ -13,9 +13,9 @@ const MessageInput: FC = () => {
   const { state } = useChatContext()
   const { everyone } = state;
 
-  const [receivers, setReceivers] = useState<IMember[]>([everyone])
+  const [receivers, setReceivers] = useState<IMember[]>([everyone]);
 
-  const [content, setContent] = useState<string>("")
+  const [content, setContent] = useState<string>("");
 
   const handleMessageContentChange = (content: string) => setContent(content);
 
@@ -24,8 +24,10 @@ const MessageInput: FC = () => {
   const handleEmojiClick = (emojiData: EmojiClickData) => setContent(prev => prev + emojiData.emoji);
 
   const handleSendMessage = () => {
+    if (content == "") return;
+
     if (!websocketClient.isConnected()) {
-      window.alert("You're not connected to the chat")
+      window.alert("You're not connected to the chat");
       return;
     }
 
@@ -34,7 +36,7 @@ const MessageInput: FC = () => {
         action: "broadcast",
         content: content ?? ""
       })
-      setContent("")
+      setContent("");
       return;
     }
 
@@ -42,11 +44,10 @@ const MessageInput: FC = () => {
       action: "direct",
       receivers: receivers.map(receiver => receiver.connectionId),
       content: content ?? ""
-    })
+    });
 
-    setContent("")
-
-    setReceivers([everyone])
+    setContent("");
+    setReceivers([everyone]);
   }
 
   return (
