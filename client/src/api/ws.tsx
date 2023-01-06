@@ -1,58 +1,57 @@
 import { IBroadcastMessage, IDirectMessage, IJoinMessage, IMessage } from "../models/message"
+import  WebSocketClient, { MessageHandler } from "@mitz-it/websocket-client"
 
 export default class ChatWebSocketClient {
-  socket: WebSocket | undefined
+  private client: WebSocketClient
+
   connection: string
   connected: boolean = false
   constructor() {
-    this.connection = import.meta.env.VITE_WEBSOCKET_URL || ""
+    const connection = import.meta.env.VITE_WEBSOCKET_URL || "";
 
-    if (this.connection == "") {
+    if (connection == "") {
       throw new Error("websocket url was not provided")
     }
+    this.connection = connection
+    this.client = new WebSocketClient(connection)
   }
 
-  onMessageReceived(callback: (message: any) => void) {
-    if (this.socket == undefined) return
+  onMessageReceived<TMessage>(handler: MessageHandler<TMessage>) {
+    if (this.client == undefined) return
 
-    this.socket.onmessage = callback;
+    this.client.addMessageHandler(handler)
   }
 
   connect() {
-    this.socket = new WebSocket(this.connection)
-    this.socket.onopen = (e) => {
-      this.connected = true
+    this.client.connect(() => {
       window.alert("connected!")
-    }
+    })
   }
 
   isConnected(): boolean {
-    return this.connected
+    return this.client.isConnected()
   }
 
   join(message: IJoinMessage) {
-    const join = JSON.stringify(message)
-    this.publish(join)
+    this.publish<IJoinMessage>(message)
   }
 
   broadcast(message: IBroadcastMessage) {
-    const broadcast = JSON.stringify(message)
-    this.publish(broadcast)
+    this.publish<IBroadcastMessage>(message)
   }
 
   direct(message: IDirectMessage) {
-    const direct = JSON.stringify(message)
-    this.publish(direct)
+    this.publish<IDirectMessage>(message)
   }
 
   requestMembersList() {
-    if (this.socket == undefined) return
-    this.socket.send(JSON.stringify({ action: "members" }))
+    if (this.client == undefined) return
+    this.client.publish({ action: "members" })
   }
 
-  private publish(message: string) {
-    if (this.socket == undefined) return
-    this.socket.send(message)
+  private publish<TMessage>(message: TMessage) {
+    if (this.client == undefined) return
+    this.client.publish<TMessage>(message)
   }
 }
 
