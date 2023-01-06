@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@jukben/emoji-search": "^2.0.1",
+    "@mitz-it/websocket-client": "^1.3.0",
     "@vitejs/plugin-basic-ssl": "^1.0.1",
     "date-fns": "^2.29.3",
     "emoji-picker-react": "^4.4.7",
