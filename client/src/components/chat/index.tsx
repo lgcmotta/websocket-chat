@@ -17,34 +17,45 @@ const Chat: FC = () => {
     if (myself.nickname == "") return;
 
     if (!websocketClient.isConnected()) {
+      websocketClient.onMessageReceived<IMessageReceived>({
+        assert: isMessage,
+        callback: handleMessage,
+        key: "message-received"
+      })
+      websocketClient.onMessageReceived<IConnectedMembers>({
+        assert: isMembersList,
+        callback: handleMembersReceived,
+        key: "connected-members"
+      })
       websocketClient.connect()
-      websocketClient.onMessageReceived(onMessageReceived)
     }
 
     setTimeout(() => {
       websocketClient.join({ action: "join", nickname: myself.nickname })
-    }, 3000)
+    }, 5000)
 
   }, [myself.nickname])
 
-  const onMessageReceived = (event: any) => {
-    const received = JSON.parse(event.data)
+  // const onMessageReceived = (event: any) => {
+  //   const received = JSON.parse(event.data)
 
-    if (isMessage(received)) {
-      const message = received as IMessageReceived
-      handleMessage(message)
-      return;
-    }
+  //   if (isMessage(received)) {
+  //     const message = received as IMessageReceived
+  //     handleMessage(message)
+  //     return;
+  //   }
 
-    if (isMembersList(received)) {
-      const connectedMembers = received as IConnectedMembers;
+  //   if (isMembersList(received)) {
+      
+  //   }
+  // }
 
-      setState(prev => {
-        return { ...prev, members: connectedMembers.members }
-      })
-    }
+  const handleMembersReceived = (connectedMembers: IConnectedMembers) => {
+    setState(prev => {
+      return { ...prev, members: connectedMembers.members }
+    })
   }
-
+  
   const handleMessage = (message: IMessageReceived) => {
     const { receiver } = message
     if (receiver.nickname == myself.nickname && myself.connectionId == "") {
